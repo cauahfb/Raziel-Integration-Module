@@ -224,6 +224,16 @@ function validatePayload(payload) {
     if (talent.activities !== undefined && !Array.isArray(talent.activities)) throw new Error(`As atividades de ${talent.name} precisam ser uma lista.`);
     for (const activity of talent.activities ?? []) {
       if (!activity.id || !activity.name || !["attack", "save", "damage", "heal", "utility"].includes(activity.type)) throw new Error(`Existe uma atividade inválida no talento ${talent.name}.`);
+      if (activity.uses !== undefined && activity.uses !== null) {
+        if (activity.uses.limited === true) {
+          const max = Number(activity.uses.max);
+          if (!Number.isInteger(max) || max < 1) throw new Error(`A atividade ${activity.name} possui quantidade máxima de usos inválida.`);
+          if (!["shortRest", "longRest", "turnStart", "special"].includes(activity.uses.recharge)) throw new Error(`A atividade ${activity.name} possui tipo de recarga não suportado.`);
+          if (activity.uses.recharge === "special" && !String(activity.uses.special ?? "").trim()) throw new Error(`A atividade ${activity.name} precisa descrever sua recarga especial.`);
+        } else if (activity.uses.limited !== false) {
+          throw new Error(`A configuração de usos da atividade ${activity.name} é inválida.`);
+        }
+      }
     }
     if (talent.isSupreme === true || talent.type === "supreme") throw new Error("O pacote contém uma Suprema. Supremas não são sincronizadas pelo Raziel Integration.");
   }
@@ -365,16 +375,42 @@ function parseDamageFormula(formula, damageType) {
   }];
 }
 
+function normalizeActivityUses(activity) {
+  const uses = activity.uses;
+  if (!uses || uses.limited !== true) {
+    return { uses: { spent: 0, max: "", recovery: [] }, consumption: { scaling: { allowed: false }, spellSlot: false, targets: [] }, special: null };
+  }
+  const max = Number(uses.max);
+  if (!Number.isInteger(max) || max < 1) throw new Error(`Quantidade de usos inválida na atividade ${activity.name}.`);
+  const periods = { shortRest: "sr", longRest: "lr", turnStart: "turnStart" };
+  const period = periods[uses.recharge];
+  const recovery = period ? [{ period, type: "recoverAll" }] : [];
+  return {
+    uses: { spent: 0, max: String(max), recovery },
+    consumption: {
+      scaling: { allowed: false },
+      spellSlot: false,
+      targets: [{ type: "activityUses", value: 1 }]
+    },
+    special: uses.recharge === "special" ? String(uses.special ?? "").trim() : null
+  };
+}
+
 function activityCommonData(activity, talent) {
   const id = stableActivityId(activity.id);
+  const normalizedUses = normalizeActivityUses(activity);
+  const description = richText(activity.description || "");
+  const chatFlavor = normalizedUses.special
+    ? [description, `<p><strong>Recarga especial:</strong> ${escapeHtml(normalizedUses.special)}</p>`].filter(Boolean).join("")
+    : description;
   const data = {
     _id: id,
     type: activity.type,
     name: String(activity.name || talent.name),
     img: talent.image || "icons/svg/aura.svg",
-    description: { chatFlavor: richText(activity.description || "") },
+    description: { chatFlavor },
     activation: { type: activity.activation?.type || "action", value: Number(activity.activation?.cost ?? 1), condition: "", override: true },
-    consumption: { scaling: { allowed: false }, spellSlot: false, targets: [] },
+    consumption: normalizedUses.consumption,
     duration: { value: null, units: "inst", concentration: false },
     range: { value: null, long: null, units: "self", special: "" },
     target: {
@@ -382,10 +418,11 @@ function activityCommonData(activity, talent) {
       template: { contiguous: false, type: "", size: "", width: "", height: "", count: "", units: "m" },
       prompt: true, override: true
     },
-    uses: { spent: 0, max: "", recovery: [] },
+    uses: normalizedUses.uses,
     flags: { [FLAG_SCOPE]: {
       managed: true, talentId: String(talent.id), activityId: String(activity.id ?? id), source: "raziel",
-      originalRangeUnit: activity.range?.unit ?? null, originalTargetUnit: activity.target?.units ?? null
+      originalRangeUnit: activity.range?.unit ?? null, originalTargetUnit: activity.target?.units ?? null,
+      specialRecharge: normalizedUses.special
     }}
   };
   if (activity.range) data.range = { value: activity.range.value ?? null, long: null, units: activity.range.unit || "m", special: "" };
@@ -438,6 +475,15 @@ async function replaceManagedActivities(item, talent) {
     if (activity?.flags?.[FLAG_SCOPE]?.managed !== true) merged[id] = activity;
   }
   const incoming = buildNativeActivities(talent);
+  // Preserve current expenditure when a managed Activity is refreshed by sync.
+  // If the maximum was reduced, clamp spent to the new maximum.
+  for (const [id, next] of Object.entries(incoming)) {
+    const previous = current[id];
+    if (previous?.flags?.[FLAG_SCOPE]?.managed !== true || !next.uses?.max) continue;
+    const oldSpent = Number(previous.uses?.spent ?? 0);
+    const max = Number(next.uses.max);
+    next.uses.spent = Number.isFinite(oldSpent) ? Math.min(Math.max(0, oldSpent), max) : 0;
+  }
   Object.assign(merged, incoming);
   await item.update({ "system.activities": merged });
   return Object.keys(incoming).length;

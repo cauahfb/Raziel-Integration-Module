@@ -2,7 +2,7 @@
   "id": "raziel-integration",
   "title": "Raziel Integration",
   "description": "Conecta o Raziel ao Foundry VTT e recebe solicitações de sincronização confirmadas pelo GM.",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "compatibility": {
     "minimum": "14",
     "verified": "14.359"
