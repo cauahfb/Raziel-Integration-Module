@@ -1,0 +1,40 @@
+.raziel-integration-window .window-content{padding:0;background:#11131a;color:#e9e5df;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;}
+.raziel-integration-shell{padding:18px;display:flex;flex-direction:column;gap:16px;font-family:var(--font-primary);min-height:0;}
+.raziel-integration-heading{display:flex;align-items:center;gap:12px;padding:4px 0 14px;border-bottom:1px solid #49404d}
+.raziel-integration-heading h2{margin:0;color:#f0d9a4;font-family:var(--font-heading);font-size:1.35rem}
+.raziel-integration-heading p{margin:3px 0 0;color:#aaa2ad;font-size:.85rem}
+.raziel-integration-mark{width:42px;height:42px;border:1px solid #9d7950;border-radius:12px;display:grid;place-items:center;color:#d9b879;background:#33283a;font-size:1.2rem}
+.raziel-version{margin-left:auto;color:#a99bad;font-size:.72rem}
+.raziel-panel-section{display:flex;flex-direction:column;gap:8px;padding:13px;border:1px solid #393441;border-radius:10px;background:#191922}
+.raziel-panel-section h3,.raziel-report h3{margin:0;color:#e5c98f;font-size:1rem}
+.raziel-panel-section p,.raziel-panel-footer p{margin:0;color:#b7b0bb;font-size:.82rem;line-height:1.45}
+.raziel-file-picker{display:flex;align-items:center;gap:10px;padding:12px;border:1px dashed #80668a;border-radius:8px;color:#e5d9ec;cursor:pointer;background:#241e2a}
+.raziel-file-picker i{color:#d7b779;font-size:1.15rem}
+.raziel-file-picker input{max-width:230px;margin-left:auto;font-size:.75rem}
+.raziel-field-label{color:#c9bdce;font-size:.8rem}
+#raziel-actor-select{width:100%;padding:9px;border:1px solid #5b5060;border-radius:7px;background:#24222c;color:#f2edf5}
+.raziel-status{padding:10px 12px;border-radius:8px;font-size:.83rem;background:#252431;color:#d7cce0;border:1px solid #4b4053}
+.raziel-status.success{background:#1b302b;border-color:#3c7765;color:#c6f0dc}
+.raziel-status.error{background:#3a2025;border-color:#8a4650;color:#ffd5d9}
+.raziel-report{padding:13px;border:1px solid #4a654f;border-radius:10px;background:#17231f;display:flex;flex-direction:column;gap:12px}
+.raziel-report-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.raziel-report-grid div{display:flex;flex-direction:column;align-items:center;padding:9px 4px;border-radius:7px;background:#22332d}
+.raziel-report-grid strong{font-size:1.3rem;color:#d5e9d9}.raziel-report-grid span{font-size:.68rem;color:#b5c9ba}
+.raziel-feature-results{margin:0;padding-left:20px}.raziel-feature-results li{padding:4px 0;color:#e7e0e9}.raziel-feature-results small{display:block;color:#a9b7ad}
+.raziel-warning{margin:0;color:#f2d49b;font-size:.8rem}
+.raziel-panel-footer{display:flex;flex-direction:column;gap:12px;padding-top:4px}
+.raziel-sync-button{display:flex;justify-content:center;align-items:center;gap:9px;padding:11px 16px;border:1px solid #c3a36d;border-radius:8px;background:linear-gradient(135deg,#806044,#a47a4c);color:#fff8eb;font-weight:700;cursor:pointer}
+.raziel-sync-button:disabled{opacity:.45;cursor:not-allowed}
+
+.raziel-integration-shell input[type="url"],
+.raziel-integration-shell input[type="password"],
+.raziel-integration-shell input[type="text"] {
+  width: 100%; min-height: 36px; padding: 7px 10px; margin: 4px 0 10px;
+  border: 1px solid var(--color-border-light-2); border-radius: 5px;
+  background: var(--color-cool-5); color: var(--color-light-1);
+}
+.raziel-secondary-button {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--color-border-light-2);
+  border-radius: 5px; background: var(--color-cool-4); color: var(--color-light-1);
+}
+.raziel-connected-note { color: #75c99a; font-size: 12px; }

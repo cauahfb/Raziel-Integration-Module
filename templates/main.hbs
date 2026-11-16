@@ -1,0 +1,80 @@
+<div class="raziel-integration-shell">
+  <header class="raziel-integration-heading">
+    <div class="raziel-integration-mark"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+    <div>
+      <h2>Raziel Integration</h2>
+      <p>Sincronização manual de talentos adquiridos</p>
+    </div>
+    <span class="raziel-version">MVP 0.3.0</span>
+  </header>
+
+  <section class="raziel-panel-section">
+    <h3>Conexão direta com Raziel</h3>
+    <p>Configure o projeto Supabase uma vez. A URL e a chave anon/public não são credenciais administrativas.</p>
+    <label class="raziel-field-label" for="raziel-bridge-url">URL do projeto Supabase</label>
+    <input id="raziel-bridge-url" type="url" value="{{bridgeUrl}}" placeholder="https://seu-projeto.supabase.co">
+    <label class="raziel-field-label" for="raziel-bridge-anon">Chave anon/public</label>
+    <input id="raziel-bridge-anon" type="password" value="{{anonKey}}" autocomplete="off">
+    <button type="button" class="raziel-secondary-button" data-action="save-bridge">Salvar configuração</button>
+    <div class="raziel-status {{connectionType}}" role="status">{{connectionMessage}}</div>
+    {{#unless paired}}
+      <label class="raziel-field-label" for="raziel-pair-code">Código gerado no site Raziel</label>
+      <input id="raziel-pair-code" type="text" placeholder="RAZ-XXXX-XXXX" autocomplete="off">
+      <button type="button" class="raziel-sync-button" data-action="pair">Parear esta instalação</button>
+    {{else}}
+      <p class="raziel-connected-note"><i class="fa-solid fa-link"></i> Instalação pareada. O módulo mantém a conexão enquanto o GM estiver no mundo.</p>
+      <button type="button" class="raziel-secondary-button" data-action="unpair">Desvincular instalação</button>
+    {{/unless}}
+  </section>
+
+  <section class="raziel-panel-section">
+    <h3>Compatibilidade / Importação manual</h3>
+    <p>Importação manual mantida temporariamente como alternativa durante a transição para a sincronização direta.</p>
+    <label class="raziel-file-picker">
+      <i class="fa-solid fa-file-arrow-up"></i>
+      <span>{{fileName}}</span>
+      <input id="raziel-json-file" type="file" accept="application/json,.json">
+    </label>
+  </section>
+
+  <section class="raziel-panel-section">
+    <h3>Ficha de destino (importação manual)</h3>
+    <label class="raziel-field-label" for="raziel-actor-select">Personagem no Foundry</label>
+    <select id="raziel-actor-select">
+      <option value="">Selecione um personagem…</option>
+      {{#each actors}}
+        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+      {{/each}}
+    </select>
+  </section>
+
+  <div class="raziel-status {{statusType}}" role="status">{{status}}</div>
+
+  {{#if report}}
+    <section class="raziel-report">
+      <h3>Resultado da sincronização</h3>
+      <div class="raziel-report-grid">
+        <div><strong>{{report.created}}</strong><span>Criadas</span></div>
+        <div><strong>{{report.updated}}</strong><span>Atualizadas</span></div>
+        <div><strong>{{report.deleted}}</strong><span>Removidas</span></div>
+        <div><strong>{{report.effectsApplied}}</strong><span>Efeitos aplicados</span></div>
+        <div><strong>{{report.activitiesCreated}}</strong><span>Atividades</span></div>
+      </div>
+      {{#if report.unsupportedEffects}}
+        <p class="raziel-warning">{{report.unsupportedEffects}} efeito(s) ainda não possuem mapeamento automático neste MVP. As Features foram preservadas.</p>
+      {{/if}}
+      <ul class="raziel-feature-results">
+        {{#each report.features}}
+          <li><span>{{name}} · nível {{level}}</span><small>{{effectsApplied}} efeito(s) · {{activitiesCreated}} atividade(s){{#if unsupportedEffects}} · {{unsupportedEffects}} sem mapeamento{{/if}}</small></li>
+        {{/each}}
+      </ul>
+    </section>
+  {{/if}}
+
+  <footer class="raziel-panel-footer">
+    <p>O módulo altera somente Features identificadas como gerenciadas pelo Raziel. Supremas não são importadas.</p>
+    <button type="button" class="raziel-sync-button" data-action="sync" {{#unless hasImport}}disabled{{/unless}}>
+      <i class="fa-solid fa-file-import"></i> Importar JSON manualmente
+    </button>
+  </footer>
+</div>
